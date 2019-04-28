@@ -27,7 +27,7 @@ import java.util.Properties;
 
 /**
  * Builds {@link SqlSession} instances.
- *
+ * 这个类的作用就是根据xml文件构建SqlSessionFactory对象
  * @author Clinton Begin
  */
 public class SqlSessionFactoryBuilder {
@@ -47,7 +47,8 @@ public class SqlSessionFactoryBuilder {
     public SqlSessionFactory build(Reader reader, String environment, Properties properties) {
         try {
             XMLConfigBuilder parser = new XMLConfigBuilder(reader, environment, properties);
-            return build(parser.parse());
+            Configuration configuration = parser.parse();
+            return build(configuration);
         } catch (Exception e) {
             throw ExceptionFactory.wrapException("Error building SqlSession.", e);
         } finally {
@@ -89,6 +90,7 @@ public class SqlSessionFactoryBuilder {
     }
 
     public SqlSessionFactory build(Configuration config) {
+        // 根据Configuartion对象实例化出一个SqlSessionFactory对象
         return new DefaultSqlSessionFactory(config);
     }
 

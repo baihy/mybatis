@@ -27,7 +27,7 @@ import java.util.Properties;
 
 /**
  * A class to simplify access to resources through the classloader.
- *
+ * 通过类加载器加载静态资源，把静态资源加载到IO流中
  * @author Clinton Begin
  */
 public class Resources {

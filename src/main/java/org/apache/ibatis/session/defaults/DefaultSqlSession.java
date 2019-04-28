@@ -15,15 +15,6 @@
  */
 package org.apache.ibatis.session.defaults;
 
-import java.io.IOException;
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import org.apache.ibatis.binding.BindingException;
 import org.apache.ibatis.cursor.Cursor;
 import org.apache.ibatis.exceptions.ExceptionFactory;
@@ -38,6 +29,11 @@ import org.apache.ibatis.session.Configuration;
 import org.apache.ibatis.session.ResultHandler;
 import org.apache.ibatis.session.RowBounds;
 import org.apache.ibatis.session.SqlSession;
+
+import java.io.IOException;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.*;
 
 /**
  * The default implementation for {@link SqlSession}.
@@ -143,6 +139,7 @@ public class DefaultSqlSession implements SqlSession {
   @Override
   public <E> List<E> selectList(String statement, Object parameter, RowBounds rowBounds) {
     try {
+      /*******************通过配置对象获取MappedStatement对象**********************/
       MappedStatement ms = configuration.getMappedStatement(statement);
       return executor.query(ms, wrapCollection(parameter), rowBounds, Executor.NO_RESULT_HANDLER);
     } catch (Exception e) {

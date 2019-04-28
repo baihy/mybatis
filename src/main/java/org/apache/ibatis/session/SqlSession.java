@@ -15,19 +15,23 @@
  */
 package org.apache.ibatis.session;
 
+import org.apache.ibatis.cursor.Cursor;
+import org.apache.ibatis.executor.BatchResult;
+
 import java.io.Closeable;
 import java.sql.Connection;
 import java.util.List;
 import java.util.Map;
-
-import org.apache.ibatis.cursor.Cursor;
-import org.apache.ibatis.executor.BatchResult;
 
 /**
  * The primary Java interface for working with MyBatis.
  * Through this interface you can execute commands, get mappers and manage transactions.
  *
  * @author Clinton Begin
+ */
+
+/**
+ * 这个接口是mybatis的核心接口，通过这个接口，可以执行任何命令，获取maapper接口和管理事务
  */
 public interface SqlSession extends Closeable {
 
