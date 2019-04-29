@@ -43,6 +43,8 @@ import java.io.Reader;
 import java.util.Properties;
 
 /**
+ * 解析xml配置文件的核心类，把xml文件解析成Configuartion对象
+ *
  * @author Clinton Begin
  * @author Kazuki Shimizu
  */
@@ -78,6 +80,7 @@ public class XMLConfigBuilder extends BaseBuilder {
     }
 
     private XMLConfigBuilder(XPathParser parser, String environment, Properties props) {
+        /************创建一个Configuration对象，并把属性进行初始化******************/
         super(new Configuration());
         ErrorContext.instance().resource("SQL Mapper Configuration");
         this.configuration.setVariables(props);
@@ -92,10 +95,16 @@ public class XMLConfigBuilder extends BaseBuilder {
         }
         parsed = true;
         /********把mybatis的配置文件中一个configuration标签对，解析成一个Configuration对象********/
-        parseConfiguration(parser.evalNode("/configuration"));
+        XNode node = parser.evalNode("/configuration");
+        parseConfiguration(node);
         return configuration;
     }
 
+    /**
+     * 解析配置文件的所有节点
+     *
+     * @param root
+     */
     private void parseConfiguration(XNode root) {
         try {
             //issue #117 read properties first
@@ -105,13 +114,16 @@ public class XMLConfigBuilder extends BaseBuilder {
             loadCustomLogImpl(settings);
             typeAliasesElement(root.evalNode("typeAliases"));
             pluginElement(root.evalNode("plugins"));
+            //处理结果对象的
             objectFactoryElement(root.evalNode("objectFactory"));
+            /*************包装结果对象*******************/
             objectWrapperFactoryElement(root.evalNode("objectWrapperFactory"));
             reflectorFactoryElement(root.evalNode("reflectorFactory"));
             settingsElement(settings);
             // read it after objectFactory and objectWrapperFactory issue #631
             environmentsElement(root.evalNode("environments"));
             databaseIdProviderElement(root.evalNode("databaseIdProvider"));
+            /*************类型处理器******************/
             typeHandlerElement(root.evalNode("typeHandlers"));
             mapperElement(root.evalNode("mappers"));
         } catch (Exception e) {
@@ -156,6 +168,7 @@ public class XMLConfigBuilder extends BaseBuilder {
     private void typeAliasesElement(XNode parent) {
         if (parent != null) {
             for (XNode child : parent.getChildren()) {
+                /********别名配置，是通过扫描包还是通过typeAlias标签来进行别名注册********/
                 if ("package".equals(child.getName())) {
                     String typeAliasPackage = child.getStringAttribute("name");
                     configuration.getTypeAliasRegistry().registerAliases(typeAliasPackage);
@@ -194,6 +207,7 @@ public class XMLConfigBuilder extends BaseBuilder {
             String type = context.getStringAttribute("type");
             Properties properties = context.getChildrenAsProperties();
             ObjectFactory factory = (ObjectFactory) resolveClass(type).newInstance();
+            /**********实例化ObjectFactory对象之后，会立马设置properties的值。所以我们在调用构造方法的时候，properties是已经被初始化好的***********/
             factory.setProperties(properties);
             configuration.setObjectFactory(factory);
         }
@@ -354,6 +368,7 @@ public class XMLConfigBuilder extends BaseBuilder {
                             typeHandlerRegistry.register(javaTypeClass, jdbcType, typeHandlerClass);
                         }
                     } else {
+                        /********没有配置javaType属性，类型处理的类头上找注解***********/
                         typeHandlerRegistry.register(typeHandlerClass);
                     }
                 }
@@ -364,6 +379,11 @@ public class XMLConfigBuilder extends BaseBuilder {
     private void mapperElement(XNode parent) throws Exception {
         if (parent != null) {
             for (XNode child : parent.getChildren()) {
+                /**
+                 * 如果要同时使用package自动扫描和通过mapper明确指定要加载的mapper，一定要确保package自动扫描的范围不包含明确指定的mapper，
+                 * 否则在通过package扫描的interface的时候，尝试加载对应xml文件的loadXmlResource()的逻辑中出现判重出错报org.apache.ibatis.binding.BindingException异常，
+                 * 即使xml文件中包含的内容和mapper接口中包含的语句不重复也会出错，包括加载mapper接口时自动加载的xml mapper也一样会出错。
+                 */
                 if ("package".equals(child.getName())) {
                     String mapperPackage = child.getStringAttribute("name");
                     configuration.addMappers(mapperPackage);

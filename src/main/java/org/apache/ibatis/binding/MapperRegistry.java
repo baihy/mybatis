@@ -15,16 +15,12 @@
  */
 package org.apache.ibatis.binding;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
-
 import org.apache.ibatis.builder.annotation.MapperAnnotationBuilder;
 import org.apache.ibatis.io.ResolverUtil;
 import org.apache.ibatis.session.Configuration;
 import org.apache.ibatis.session.SqlSession;
+
+import java.util.*;
 
 /**
  * @author Clinton Begin
@@ -64,7 +60,9 @@ public class MapperRegistry {
       }
       boolean loadCompleted = false;
       try {
-        knownMappers.put(type, new MapperProxyFactory<>(type));
+        /*为mapper接口创建一个MapperProxyFactory代理*/
+        MapperProxyFactory<T> mapperProxyFactory = new MapperProxyFactory<>(type);
+        knownMappers.put(type, mapperProxyFactory);
         // It's important that the type is added before the parser is run
         // otherwise the binding may automatically be attempted by the
         // mapper parser. If the type is already known, it won't try.
