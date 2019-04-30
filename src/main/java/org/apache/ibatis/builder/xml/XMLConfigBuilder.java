@@ -296,7 +296,9 @@ public class XMLConfigBuilder extends BaseBuilder {
                 String id = child.getStringAttribute("id");
                 if (isSpecifiedEnvironment(id)) {
                     TransactionFactory txFactory = transactionManagerElement(child.evalNode("transactionManager"));
-                    DataSourceFactory dsFactory = dataSourceElement(child.evalNode("dataSource"));
+                    XNode dataSourceContext = child.evalNode("dataSource");
+                    /********根据配置信息获取DataSourceFactory********/
+                    DataSourceFactory dsFactory = dataSourceElement(dataSourceContext);
                     DataSource dataSource = dsFactory.getDataSource();
                     Environment.Builder environmentBuilder = new Environment.Builder(id)
                             .transactionFactory(txFactory)
@@ -339,6 +341,7 @@ public class XMLConfigBuilder extends BaseBuilder {
 
     private DataSourceFactory dataSourceElement(XNode context) throws Exception {
         if (context != null) {
+            /******通过配置的数据源别名，来获取数据演*********/
             String type = context.getStringAttribute("type");
             Properties props = context.getChildrenAsProperties();
             DataSourceFactory factory = (DataSourceFactory) resolveClass(type).newInstance();
